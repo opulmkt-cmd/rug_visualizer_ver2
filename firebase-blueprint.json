@@ -1,0 +1,128 @@
+{
+  "entities": {
+    "RugConfig": {
+      "title": "RugConfig",
+      "description": "Configuration for a custom rug design",
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "string" },
+        "colors": { "type": "array", "items": { "type": "string" } },
+        "materialTypes": { "type": "array", "items": { "type": "string" } },
+        "preset": { "type": "string" },
+        "width": { "type": "number" },
+        "length": { "type": "number" },
+        "construction": { "type": "string" },
+        "pileType": { "type": "string" },
+        "pileHeight": { "type": "string" },
+        "surfaceFinishes": { "type": "array", "items": { "type": "string" } },
+        "seed": { "type": "number" },
+        "midjourneyMode": { "type": "boolean" }
+      },
+      "required": ["prompt", "colors", "materialTypes", "width", "length", "construction", "pileType", "pileHeight", "surfaceFinishes", "seed"]
+    },
+    "SavedDesign": {
+      "title": "SavedDesign",
+      "description": "A saved rug design in the user's wishlist",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "prompt": { "type": "string" },
+        "config": { "$ref": "RugConfig" },
+        "status": { "type": "string" },
+        "folderId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "imageUrl", "config", "createdAt"]
+    },
+    "Folder": {
+      "title": "Folder",
+      "description": "A collection/project folder for organizing designs",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "designIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId", "name", "createdAt"]
+    },
+    "Prompt": {
+      "title": "Prompt",
+      "description": "A record of a user's generation prompt",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "text", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A record of a purchase (rug or plan)",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["Rug Order", "Plan Upgrade", "Deposit"] },
+        "status": { "type": "string", "enum": ["Pending", "Paid", "Processing", "Cancelled"] },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "billingAddress": {
+          "type": "object",
+          "properties": {
+            "line1": { "type": "string" },
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "postalCode": { "type": "string" },
+            "country": { "type": "string" }
+          }
+        },
+        "config": { "$ref": "RugConfig" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "status", "amount", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and credit information",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "credits": { "type": "number" },
+        "tier": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "credits", "tier", "role"]
+    }
+  },
+  "firestore": {
+    "/designs/{designId}": {
+      "schema": "SavedDesign",
+      "description": "User's saved rug designs"
+    },
+    "/projects/{projectId}": {
+      "schema": "Folder",
+      "description": "User's project folders"
+    },
+    "/prompts/{promptId}": {
+      "schema": "Prompt",
+      "description": "User's generation history"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "User's purchase history"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and credits"
+    }
+  }
+}
