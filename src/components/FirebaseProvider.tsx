@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ShieldCheck } from 'lucide-react';
 import type { FirebaseUser } from '../firebase';
 import { initFirebase, onAuthStateChanged, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
@@ -44,6 +45,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   const [profileLoading, setProfileLoading] = React.useState(false);
   const [isAuthReady, setIsAuthReady] = React.useState(false);
   const [firebaseReady, setFirebaseReady] = React.useState(false);
+  const [initError, setInitError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let unsubscribeAuth: (() => void) | null = null;
@@ -118,8 +120,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
           
           setLoading(false);
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Firebase setup failed:", error);
+        setInitError(error.message || "Failed to initialize application services.");
         setLoading(false);
       }
     };
@@ -131,6 +134,30 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       if (unsubscribeProfile) unsubscribeProfile();
     };
   }, []);
+
+  if (initError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white text-black p-8">
+        <div className="max-w-md w-full bg-red-50 border border-red-100 rounded-[2rem] p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShieldCheck className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-serif font-bold mb-4 text-red-600 uppercase tracking-widest">Setup Required</h2>
+          <p className="text-red-900/60 mb-8 text-sm font-medium leading-relaxed">
+            {initError}
+          </p>
+          <div className="space-y-4">
+            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Troubleshooting:</p>
+            <ul className="text-[10px] text-left text-red-900/40 space-y-2 font-medium uppercase tracking-wider">
+              <li>• Check Vercel Environment Variables</li>
+              <li>• Ensure FIREBASE_API_KEY is set</li>
+              <li>• Redeploy app after updating settings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <FirebaseContext.Provider value={{ user, profile, loading, profileLoading, isAuthReady, firebaseReady }}>
